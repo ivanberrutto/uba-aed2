@@ -1,5 +1,4 @@
 package aed;
-
 import java.util.*;
 
 // Todos los tipos de datos "Comparables" tienen el método compareTo()
@@ -20,15 +19,15 @@ public class ABB<T extends Comparable<T>> implements Conjunto<T> {
         padre = null;
         }
     }
-    
+
 
     public ABB() {
         raiz=null;
         cardinal=0;
     }
-    
+
     private void ponernodo(Nodo raizactual ,T elem){
-        
+
         if (raizactual== null) {
             //si entre aca es porque no habia raiz inicial
             Nodo nuevo = new Nodo(elem);
@@ -36,14 +35,15 @@ public class ABB<T extends Comparable<T>> implements Conjunto<T> {
             //raizactual = nuevo; esto estaba mal porq no referia a la memoria bien
             cardinal++;
         } else{
-            if(raizactual.valor.compareTo(elem)==0){ 
+            if(raizactual.valor.compareTo(elem)==0){
                 //ya esta puesto el nodo con ese valor osea q no hago nada ahre
             }
             else if(raizactual.valor.compareTo(elem)>0){
                 //si la raiz es mas grande que el elemento entonces lo pongo en la izquierda
-                
+
                 if(raizactual.izq==null){
                     raizactual.izq=new Nodo(elem);
+                    raizactual.izq.padre=raizactual;
                     cardinal++;
                 } else{
                     ponernodo(raizactual.izq,elem);
@@ -51,6 +51,7 @@ public class ABB<T extends Comparable<T>> implements Conjunto<T> {
             } else {
                 if(raizactual.der==null){
                     raizactual.der=new Nodo(elem);
+                    raizactual.der.padre=raizactual;
                     cardinal++;
                 } else{
                     ponernodo(raizactual.der,elem);
@@ -64,7 +65,7 @@ public class ABB<T extends Comparable<T>> implements Conjunto<T> {
         if (raizactual==null){
             return false;
         }else{
-            if(raizactual.valor.compareTo(elem)==0){ 
+            if(raizactual.valor.compareTo(elem)==0){
                 return true;
             }
             else if(raizactual.valor.compareTo(elem)>0){
@@ -76,6 +77,35 @@ public class ABB<T extends Comparable<T>> implements Conjunto<T> {
         }
         return flag;
     }
+    private boolean notienedescendencia(Nodo nodo){
+        return nodo.izq==null && nodo.der==null;
+    }
+    private void eliminarnodo(Nodo raizactual, T elem){
+
+
+            if(raizactual.valor.compareTo(elem)>0){
+                //si la raiz es mas grande que el elemento entonces lo pongo en la izquierda
+
+                if(notienedescendencia(raizactual)){
+                    raizactual = null;
+                }
+                else if(raizactual.izq==null){
+
+                }
+            }
+            else if(raizactual.valor.compareTo(elem)<0){
+
+
+            } else {
+            }
+
+    }
+
+
+
+
+
+
 
     public int cardinal() {
         return cardinal;
@@ -116,22 +146,132 @@ public class ABB<T extends Comparable<T>> implements Conjunto<T> {
     }
 
     public void eliminar(T elem){
-        throw new UnsupportedOperationException("No implementada aun");
+
+        if(!versiestavalor(raiz,elem)) {
+            //no hago nada
+        } else {
+            Nodo prev = raiz;
+            Nodo actual = raiz;
+            if (actual == null) {
+            } else {
+                while (actual !=null && actual.valor != elem) {
+                    if (versiestavalor(actual.izq, elem)) {
+                        prev = actual;
+                        actual = actual.izq;
+                    } else {
+                        prev = actual;
+                        actual = actual.der;
+                    }
+                }if(actual==null){}else {
+                    if (actual.izq == null && actual.der == null) {
+                        if(prev.izq==actual){
+                            prev.izq = null;}
+                        else if(prev.der==actual){
+                            prev.der = null;
+                        }
+                    } else if (actual.izq == null) {
+                        //if(actual.padre!=null)actual.der.padre=actual.padre;
+                        if(prev.izq==actual){
+                            prev.izq = actual.der;}
+                        else if(prev.der==actual){
+                            prev.der = actual.der;
+                        }
+                    } else if (actual.der == null) {
+                        //if(actual.padre!=null)actual.izq.padre=actual.padre;
+                        if(prev.izq==actual){
+                            prev.izq = actual.izq;}
+                        else if(prev.der==actual){
+                            prev.der = actual.izq;
+                        }
+                    } else {
+                        //busco el inmediato sucesor
+                        Nodo actualsucesor = actual.der;
+                        Nodo prevsucesor = actual.der;
+                        if (actualsucesor.izq==null){
+                            if(prev.izq==actual){
+                                prev.izq.valor = actualsucesor.valor;}
+                            else if(prev.der==actual){
+                                prev.der.valor = actualsucesor.valor;
+                            }
+                            actual.der=actualsucesor.der;}
+                        while (actualsucesor.izq != null) {
+                            prevsucesor = actualsucesor;
+                            actualsucesor = actualsucesor.izq;
+                        }
+
+                        actual.valor = actualsucesor.valor;
+                        prevsucesor.izq = actualsucesor.der;
+                    }
+                    cardinal--;
+                    //eliminarnodo(raiz,elem);
+                }
+
+            }
+        }
+
+
+    }
+    private boolean pertenece(T elem,ArrayList<T> sec){
+        return sec.contains(elem);
     }
 
     public String toString(){
-        throw new UnsupportedOperationException("No implementada aun");
+        ArrayList<T> pasados = new ArrayList<>();
+        String mistring = "{" + minimo();
+        pasados.add(minimo());
+        Nodo actualmenor = raiz;
+        while(pasados.size()<cardinal){
+            while (actualmenor.izq!=null &&
+                    !pertenece(actualmenor.izq.valor,pasados)){
+                actualmenor = actualmenor.izq;
+            }
+            if(!pertenece(actualmenor.valor,pasados)){
+                mistring = mistring + "," + actualmenor.valor;
+                pasados.add(actualmenor.valor);
+            }
+            if(actualmenor.der!=null && !pertenece(actualmenor.der.valor,pasados)){
+                actualmenor= actualmenor.der;
+            }else{
+                if(actualmenor.padre!=null){actualmenor=actualmenor.padre;}
+                else{actualmenor=actualmenor.der;}
+            }
+        }
+        mistring=mistring+"}";
+        return mistring;
     }
 
     private class ABB_Iterador implements Iterador<T> {
         private Nodo _actual;
+        int dedito;
+        ABB_Iterador(){dedito=0;}
 
-        public boolean haySiguiente() {            
-            throw new UnsupportedOperationException("No implementada aun");
+        public boolean haySiguiente() {
+            return _actual.valor != maximo();
         }
-    
+
         public T siguiente() {
-            throw new UnsupportedOperationException("No implementada aun");
+            ArrayList<T> pasados = new ArrayList<>();
+            String mistring = "{" + minimo();
+            pasados.add(minimo());
+            Nodo actualmenor = raiz;
+            while(pasados.size()<=dedito){
+                while (actualmenor.izq!=null &&
+                        !pertenece(actualmenor.izq.valor,pasados)){
+                    actualmenor = actualmenor.izq;
+                }
+                if(!pertenece(actualmenor.valor,pasados)){
+                    mistring = mistring + "," + actualmenor.valor;
+                    pasados.add(actualmenor.valor);
+                }
+                if(actualmenor.der!=null && !pertenece(actualmenor.der.valor,pasados)){
+                    actualmenor= actualmenor.der;
+                }else{
+                    if(actualmenor.padre!=null){actualmenor=actualmenor.padre;}
+                    else{actualmenor=actualmenor.der;}
+                }
+            }
+            dedito= dedito+1;
+            return pasados.get(pasados.size()-1);
         }
     }
 
