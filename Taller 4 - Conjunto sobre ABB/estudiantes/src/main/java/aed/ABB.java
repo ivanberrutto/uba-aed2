@@ -200,7 +200,13 @@ public class ABB<T extends Comparable<T>> implements Conjunto<T> {
                         }
 
                         actual.valor = actualsucesor.valor;
-                        prevsucesor.izq = actualsucesor.der;
+                        if(notienedescendencia(actualsucesor)){
+                            prevsucesor.izq = null;
+                        }else {
+                            actualsucesor.der.padre = actualsucesor.padre;
+                            prevsucesor.izq = actualsucesor.der;
+
+                        }
                     }
                     cardinal--;
                     //eliminarnodo(raiz,elem);
